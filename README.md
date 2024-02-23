@@ -132,8 +132,13 @@ JDK8 共耗时：31800毫秒
 JDK17 共耗时：17482毫秒
 
 
-
-
+```java
+for (int i = 0; i < 10000000; i++) {
+System.out.println("第" + i + "次循环");
+}
+long end = System.currentTimeMillis();
+System.out.println("共耗时：" + (end - begin) + "毫秒");`
+```
 
 
  
