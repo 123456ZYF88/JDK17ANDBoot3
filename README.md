@@ -141,4 +141,148 @@ System.out.println("共耗时：" + (end - begin) + "毫秒");`
 ```
 
 
- 
+
+
+ # SpringBoot3 
+
+
+
+@[TOC](文章目录)
+
+---
+[官方链接===============================官方](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Release-Notes)
+# 一、Spring_Boot_3
+## 1、基本变化
+Spring Boot3于2020年5月20日发布，9月正式维护
+必须JDk17以上版本， idea 必须 是2021版以上
+## 2、Spring Framework 6
+Spring Boot 3.0 基于 [Spring Framework 6](https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-Spring-Framework-6.x) 构建并需要 Spring Framework 6
+
+## 3、部分第三方jar将更新到最新稳定版
+看官网
+
+## 4、部分依赖从Java EE改为Jakarta EE
+Spring Boot 3.0 已将所有依赖项的 API 从 Java EE 迁移到 Jakarta EE API。只要有可能，我们都会选择 Jakarta EE 10 兼容的依赖项
+
+Jakarta EE 名字为开发者投票选择。
+# 二、变化
+## 2.1、spring.factories文件废弃
+如果你有自己写的springboot-starter，那么你一定用/META-INF/spring.favtories文件定义过发现自动配置。
+但是在sbt2.7时，这个文件被弃用了，但还没有移除这个功能，在sbt3中，它被移除了。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/direct/e8a2c2cdb6394ac98e3e5217ffa852ce.png)
+
+## 2.2、Spring Native （GraalVM ）
+[官网怎么使用](https://docs.spring.io/spring-boot/docs/3.0.0/reference/html/native-image.html#native-image)
+
+就是将你的jar直接打包成exe，直接可以运行，不同系统打包不同格式
+
+Spring Native 也是升级的一个重大特性，支持使用 GraalVM 将 SpringBoot 的应用程序编译成本地可执行的镜像文件，可以显著提升启动速度、峰值性能以及减少内存使用。
+
+我们传统的应用都是编译成字节码，然后通过 JVM 解释并最终编译成机器码来运行，而 Spring Native 则是通过 AOT 提前编译为机器码，在运行时直接静态编译成可执行文件，不依赖 JVM。GraalVM的即时编译器和AOT编译器可以显著提高应用程序的性能。据测试，GraalVM的性能可以比传统的JVM高出20%-100%。
+
+## 2.3、jakarta代替javax
+
+## 2.4、改进的@ConstructorBinding检测
+以前如果希望属性绑定到类中，我们通过使用@ConfigurationProperties和@ConstructorBinding注解可以做到。
+
+新版本针对该注解做了优化，当使用构造函数绑定@ConfigurationProperties 时，如果类只有一个参数的构造函数，则不再需要@ConstructorBinding注解。
+
+有多个构造函数，就使用@ConstructorBinding来告诉 Spring 使用哪个构造函数。
+## 2.5、Log4j2增强
+特定于配置文件的配置
+比如下面针对不同环境的配置方式。
+```xml
+   <SpringProfile name="staging">
+       <!-- configuration to be enabled when the "staging" profile is active -->
+   </SpringProfile>
+   
+   <SpringProfile name="dev | staging">
+       <!-- configuration to be enabled when the "dev" or "staging" profiles are active -->
+   </SpringProfile>
+   
+   <SpringProfile name="!production">
+       <!-- configuration to be enabled when the "production" profile is not active -->
+   </SpringProfile>
+
+```
+
+环境属性查找
+支持在 Log4j2配置中引用 Spring 环境中的属性，使用 Spring: 前缀。
+```xml
+<Properties>
+    <Property name="applicationName">${spring:spring.application.name}</property>
+</Properties>
+
+```
+
+Log4j2 系统属性
+## 2.6、RestTemplate默认httpclient变动
+## 2.7、Spring Boot 3.0  改进的安全特性，例如支持 OAuth 2.0 和 JSON Web Token (JWT) 身份验证。
+
+## Micrometer 升级（一个监控系统数据的东西好像是）
+
+
+Spring Boot 3.0 支持 Micrometer 1.10 中引入的新的 Observation API，新的 ObservationRegistry提供一个 API 就可以创建 metrics和 trace，新版本 SpringBoot 现在将会自动装配ObservationRegistry，并且可以使用ObservationRegistryCustomizer进一步定制化ObservationRegistry。
+## Micrometer Tracing 自动装配
+SpringBoot 现在自动装配Micrometer Tracing ，包括对 Brave, OpenTelemetry, Zipkin 和 Wavefron 的支持。
+
+另外，当引入io.micrometer:micrometer-registry-otlp包之后， OtlpMeterRegistry也会自动装配。
+## Prometheus 支持
+如果存在 Prometheus 依赖和 Tracer Bean，将会自动装配SpanContextSupplier，SpanContextSupplier将会把 metrics 关联到 trace，因为它会把当前的 traceID 和 spanID 保存到 Prometheus 的 Example 中。
+## 更灵活的Spring Data JDBC装配
+Spring Data JDBC的自动装配现在更加灵活，Spring Data JDBC 所需的几个自动装配的 Bean现在是有条件的，可以通过定义相同类型的Bean来替换，可以替换的Bean类型如下： 看参考文章
+
+## Kafka异步ACK支持
+现在可以通过设置spring.kafka.listener.async-acks=true来开启 Kafka 的异步 ACK，并且需要设置spring.kafka.listener.async-mode为manual or manual-immediate。
+## 新的Elasticsearch JAVA客户端支持
+支持新版本的 ES JAVA 客户端自动装配，可以通过属性spring.elasticsearch.*来配置。
+## JdkClientHttpConnector 自动装配
+如果没有 Netty Reactor、Jetty reactive client 和 Apache HTTP client ，将自动装配JdkClientHttpConnector，这允许WebClient和 JDK 的HttpClient一起使用。
+## @SpringBootTest优化升级
+现在任何@SpringBootConfiguration中的main方法都可以使用@SpringBootTest注解，但是需要将@SpringBootTest的useMainMethod属性设置为UseMainMethod.ALWAYS 或者UseMainMethod.WHEN_AVAILABLE。
+
+# 杂七杂八
+
+- 在应用程序启动时候不再记录Host Name，可以提高启动速度，缩短网络查找的耗时
+- 移除了对 SecurityManager 的支持。
+- 在Spring Framework6中移除CommonsMultipartResolver之后，对它的支持也被移除了。
+- 为了保持和 Spring6 版本一致，不再推荐使用spring.mvc.ignore-default-model-on-redirect
+- Web Jar 资源处理器 path pattern 可以使用参数spring.mvc.webjars-path-pattern 、 spring.webflux.webjars-path-pattern自定义
+- Tomcat 远程 IP 阀的可信代理可以使用 server.Tomcat.Remoteip.trust-proxy 配置。
+- 可以通过定义 ValidationConfigurationCustomizer 来自定义 Bean 的校验。
+- Log4j2的 Log4jBridgeHandler 现在用于将基于 JUL 的日志路由到 Log4j2，而不是通过 SLF4J 路由。
+- 实现 MeterBinder 接口的 Bean 现在只有在所有单例 Bean 初始化之后才绑定到meter registries。
+- 用于 Brave 和 OpenTelemetry 的 SpanCustomizer bean 现在会自动装配
+- Micrometer 的 JvmCompilationMetrics 现在会自动装配。
+- DiskSpaceHealthIndicator 现在其日志消息中包含路径及其健康详细信息。
+- 现在可以从包装的 DataSource 派生 DataSourceBuilder。
+- 现在可以使用 spring.data.mongodb.additional-hosts 属性为 MongoDB 配置多个 host。
+- 可以使用 spring.elasticsearch.socket-keep-alive 属性配置 Elasticsearch 的 socketKeepAlive 属性。
+- 在使用 spring-rabbit-stream 时，RabbitStreamTemplate 和 Environment 现在将自动装配，无论 spring.rabbitmq.listener.type 是否是 stream。
+- 已有的 Kafka 主题可以使用 spring.kafka.admin.modify-topic-configs 进行修改。
+- WebDriverScope 和 WebDriverTestExectionListener 现在是 public，以方便在自定义测试配置中使用 WebDriver。
+
+
+
+
+# 抛弃或者替换等
+
+- @ConstructorBinding已从org.springframework.boot.context.properties包移至org.springframework.boot.context.properties.bind.
+- JsonMixinModule基于扫描的构造函数已被弃用。
+- ClientHttpRequestFactorySupplier应替换为ClientHttpRequestFactories.
+- 不再支持 Cookie 注释属性。
+- RestTemplateExchangeTagsProvider、WebClientExchangeTagsProvider、WebFluxTagsProvider和WebMvcTagsProvider相关类已替换为ObservationConvention等效类。
+- 基类上的无参数构造函数HealthContributor @Configuration已被弃用。
+- DefaultTestExecutionListenersPostProcessor并SpringBootDependencyInjectionTestExecutionListener已被弃用，取而代之的是 Spring 框架的ApplicationContextFailureProcessor.
+- 这些属性management.metrics.export.<product>已弃用，替代品是management.<product>.metrics.export.
+- @AutoConfigureMetrics已被弃用，取而代之的是@AutoConfigureObservability.
+- management.prometheus.metrics.export.pushgateway.shutdown-operation支持 POST
+
+# 参考文章
+个人笔记，不同意见，望有交流
+直接可以点击跳转连接
+
+[作者 Spring](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.0-Release-Notes)
+
+[作者：艾小仙](https://www.cnblogs.com/ilovejaney/p/16931780.html#micrometer-%E5%8D%87%E7%BA%A7)
+
